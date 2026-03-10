@@ -172,3 +172,33 @@ class DatasetCatalog:
                 audio_folder=None,
             ),
         }
+
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+
+        # the following dataset utilized for multimodal empathy fine-tuning.
+
+        self.empathy_text_instruction = {
+            "target": "nextgpt.dataset.empathy_dataset.EmpathyDataset",
+            "params": dict(
+                data_path="./data/empathy/empathy_text_instruction.json",
+                image_folder=None,
+                video_folder=None,
+                audio_folder=None,
+                audio_caption_emb_folder="./data/it/embed/",
+                video_caption_emb_folder="./data/it/embed/",
+                image_caption_emb_folder="./data/it/embed/",
+            ),
+        }
+
+        self.empathy_multimodal_instruction = {
+            "target": "nextgpt.dataset.empathy_dataset.EmpathyDataset",
+            "params": dict(
+                data_path="./data/empathy/empathy_multimodal_instruction.json",
+                image_folder="./data/empathy/images",
+                video_folder="./data/empathy/videos",
+                audio_folder="./data/empathy/audios",
+                audio_caption_emb_folder="./data/it/embed/",
+                video_caption_emb_folder="./data/it/embed/",
+                image_caption_emb_folder="./data/it/embed/",
+            ),
+        }

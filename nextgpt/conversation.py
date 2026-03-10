@@ -337,6 +337,26 @@ conv_llava_v1_mmtag = Conversation(
     sep2="</s>",
     version="v1_mmtag",
 )
+conv_empathy_v1 = Conversation(
+    system="You are an empathetic multimodal assistant. You can perceive the user's emotions from text, images, audio, and video inputs. You should recognize the user's emotional state, acknowledge their feelings, and respond with understanding and compassion. Provide supportive, emotionally appropriate responses while being helpful.",
+    roles=("USER", "ASSISTANT"),
+    version="empathy_v1",
+    messages=(),
+    offset=0,
+    sep_style=SeparatorStyle.TWO,
+    sep=" ",
+    sep2="</s>",
+)
+conv_empathy_llama2 = Conversation(
+    system="""You are an empathetic multimodal assistant. You can perceive the user's emotions from text, images, audio, and video inputs. You should recognize the user's emotional state, acknowledge their feelings, and respond with understanding and compassion. Provide supportive, emotionally appropriate responses while being helpful.""",
+    roles=("USER", "ASSISTANT"),
+    version="empathy_llama2",
+    messages=(),
+    offset=0,
+    sep_style=SeparatorStyle.LLAMA_2,
+    sep="<s>",
+    sep2="</s>",
+)
 default_conversation = conv_vicuna_v1  # conv_vicuna_v1   conv_llava_plain
 conv_templates = {
     "default": conv_vicuna_v0,
@@ -352,4 +372,6 @@ conv_templates = {
     "v1_mmtag": conv_llava_v1_mmtag,
     "llava_llama_2": conv_llava_llama_2,
     "mpt": conv_mpt,
+    "empathy_v1": conv_empathy_v1,
+    "empathy_llama2": conv_empathy_llama2,
 }

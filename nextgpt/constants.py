@@ -45,3 +45,40 @@ AUDIO_SIGNAL_TOKEN = "<audio_{:05d}>"
 MAX_AUDIO_LENGTH = 16
 
 
+# Emotion labels for multimodal empathy model
+EMOTION_LABELS = [
+    "surprised",
+    "excited",
+    "angry",
+    "proud",
+    "sad",
+    "annoyed",
+    "grateful",
+    "lonely",
+    "afraid",
+    "terrified",
+    "guilty",
+    "impressed",
+    "disgusted",
+    "hopeful",
+    "confident",
+    "furious",
+    "anxious",
+    "anticipating",
+    "joyful",
+    "nostalgic",
+    "disappointed",
+    "prepared",
+    "jealous",
+    "content",
+    "devastated",
+    "sentimental",
+    "embarrassed",
+    "caring",
+    "trusting",
+    "ashamed",
+    "apprehensive",
+    "faithful",
+]
+NUM_EMOTION_LABELS = len(EMOTION_LABELS)
+EMOTION_TO_IDX = {label: idx for idx, label in enumerate(EMOTION_LABELS)}

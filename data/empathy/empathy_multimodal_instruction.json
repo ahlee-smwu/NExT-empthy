@@ -1,0 +1,58 @@
+[
+    {
+        "emotion": "sad",
+        "input_image": "sad_person_01.jpg",
+        "conversations": [
+            {
+                "from": "human",
+                "value": "<image>\nThis is how I feel today. I just lost someone very close to me."
+            },
+            {
+                "from": "gpt",
+                "value": "I can see how heavy your heart is right now. Losing someone close to you is one of the most painful experiences, and I'm truly sorry you're going through this. It's okay to grieve and feel this sadness — there's no right way or timeline for processing loss. Please take care of yourself and reach out to people who care about you. You don't have to go through this alone."
+            }
+        ]
+    },
+    {
+        "emotion": "excited",
+        "input_video": "celebration_01.mp4",
+        "conversations": [
+            {
+                "from": "human",
+                "value": "<video>\nLook at this! We just won the championship game!"
+            },
+            {
+                "from": "gpt",
+                "value": "What an incredible moment! I can feel the excitement and energy from this celebration! Winning the championship is such an amazing achievement — all the hard work, practice, and teamwork have paid off in the best possible way. You and your team should be so proud! Enjoy every second of this well-deserved victory!"
+            }
+        ]
+    },
+    {
+        "emotion": "afraid",
+        "input_audio": "storm_sounds_01.wav",
+        "conversations": [
+            {
+                "from": "human",
+                "value": "<audio>\nI'm alone at home during this terrible storm and I'm really scared."
+            },
+            {
+                "from": "gpt",
+                "value": "I can hear how intense that storm sounds, and it's completely understandable to feel scared, especially when you're alone. Storms can be really overwhelming. Try to stay in the safest part of your home, away from windows. Taking slow, deep breaths can help calm your nerves. Remember that storms always pass. Is there someone you can call to keep you company on the phone until it eases up?"
+            }
+        ]
+    },
+    {
+        "emotion": "nostalgic",
+        "input_image": "old_photo_01.jpg",
+        "conversations": [
+            {
+                "from": "human",
+                "value": "<image>\nI found this old photo while cleaning. It brings back so many memories."
+            },
+            {
+                "from": "gpt",
+                "value": "Old photos have such a powerful way of connecting us to cherished moments from the past. It sounds like this photo holds very special memories for you. Nostalgia can be bittersweet — it reminds us of beautiful times while making us aware of how things have changed. Treasure these memories; they're a part of what makes you who you are today. Would you like to share what this photo means to you?"
+            }
+        ]
+    }
+]
