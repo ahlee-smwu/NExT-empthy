@@ -108,7 +108,7 @@ class Predictor(BasePredictor):
         disable_torch_init()
 
         # ./pretrain_ckpt/vicuna-7b-v1.5
-        self.tokenizer, self.model, self.image_processor, self.video_processor, self.audio_processor, self.context_len, self.model_config = load_pretrained_model(model_base, model_name, model_path, load_8bit=load_8bit, load_4bit=load_4bit) 
+        self.tokenizer, self.model, self.image_processor, self.video_processor, self.audio_processor, self.context_len, self.model_config = load_pretrained_model(model_path, model_base, model_name, load_8bit=load_8bit, load_4bit=load_4bit) 
                                     
     def predict(
         self,
