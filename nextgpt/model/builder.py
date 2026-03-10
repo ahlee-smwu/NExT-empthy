@@ -51,7 +51,7 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
             warnings.warn('There is `lora` in model name but no `model_base` is provided. If you are loading a LoRA model, please provide the `model_base` argument. Detailed instruction: https://github.com/haotian-liu/LLaVA#launch-a-model-worker-lora-weights-unmerged.')
         if 'lora' in model_name.lower() and model_base is not None:
             from nextgpt.model.language_model.nextgpt_llama import NextGPTConfig
-            base_cfg_pretrained = NextGPTConfig.from_pretrained(model_base)
+            base_cfg_pretrained = NextGPTConfig.from_pretrained(model_path)
             print('Loading NExT-GPT from base model...')
             model = NextGPTLlamaForCausalLM.from_pretrained(model_base, low_cpu_mem_usage=True, config=base_cfg_pretrained, ignore_mismatched_sizes=True, **kwargs)
             
@@ -87,11 +87,18 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
             print('Loading NExT-GPT from base model...')
             tokenizer = AutoTokenizer.from_pretrained(model_base, use_fast=False)
             from nextgpt.model.language_model.nextgpt_llama import NextGPTConfig
-            cfg_pretrained = NextGPTConfig.from_pretrained(model_base)
+            cfg_pretrained = NextGPTConfig.from_pretrained(model_path)
             print('cfg_pretrained: ', cfg_pretrained)
-            model = NextGPTLlamaForCausalLM.from_pretrained(model_base, config=cfg_pretrained).to(device="cuda", dtype=torch.float16) 
+            model = NextGPTLlamaForCausalLM.from_pretrained(model_base, config=cfg_pretrained, ignore_mismatched_sizes=True).to(device="cuda", dtype=torch.float16) 
             print("kwargs: ", kwargs)
-            
+
+            print('Loading additional NExT-GPT weights...')
+            if os.path.exists(os.path.join(model_path, 'non_lora_trainables.bin')):
+                non_lora_trainables = torch.load(os.path.join(model_path, 'non_lora_trainables.bin'), map_location='cpu')
+                non_lora_trainables = {(k[11:] if k.startswith('base_model.') else k): v for k, v in non_lora_trainables.items()}
+                if any(k.startswith('model.model.') for k in non_lora_trainables):
+                    non_lora_trainables = {(k[6:] if k.startswith('model.') else k): v for k, v in non_lora_trainables.items()}
+                model.load_state_dict(non_lora_trainables, strict=False)
 
             print('mm_input_projector device', model.get_model().mm_input_projector.device)
             print('mm_input_projector dtype', model.get_model().mm_input_projector.dtype)
