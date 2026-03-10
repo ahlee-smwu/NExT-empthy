@@ -145,7 +145,18 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
         if mm_use_im_start_end:
             tokenizer.add_tokens([DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN], special_tokens=True)
 
-        # num_new_tokens = tokenizer.add_tokens(signal_token_list, special_tokens=True)
+        # Add signal tokens to the tokenizer (matching initialize_vision_tokenizer in training)
+        n_img_tokens = getattr(model.config, "n_img_tokens", 4)
+        n_vid_tokens = getattr(model.config, "n_vid_tokens", 24)
+        n_aud_tokens = getattr(model.config, "n_aud_tokens", 8)
+        signal_token_list = []
+        signal_token_list.extend([f"<image_{i:02d}>" for i in range(n_img_tokens)])
+        signal_token_list.extend([f"<video_{i:02d}>" for i in range(n_vid_tokens)])
+        signal_token_list.extend([f"<audio_{i:02d}>" for i in range(n_aud_tokens)])
+        num_new_tokens = tokenizer.add_tokens(signal_token_list, special_tokens=True)
+        if num_new_tokens > 0:
+            print(f"Added {num_new_tokens} signal tokens to tokenizer.")
+
         if mm_use_im_patch_token or mm_use_im_start_end:
             model.resize_token_embeddings(len(tokenizer))
 
