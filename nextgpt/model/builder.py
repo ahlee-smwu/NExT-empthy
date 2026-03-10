@@ -51,9 +51,17 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
             warnings.warn('There is `lora` in model name but no `model_base` is provided. If you are loading a LoRA model, please provide the `model_base` argument. Detailed instruction: https://github.com/haotian-liu/LLaVA#launch-a-model-worker-lora-weights-unmerged.')
         if 'lora' in model_name.lower() and model_base is not None:
             from nextgpt.model.language_model.nextgpt_llama import NextGPTConfig
-            base_cfg_pretrained = NextGPTConfig.from_pretrained(model_base)
+            base_cfg_pretrained = NextGPTConfig.from_pretrained(model_path)
+            # Use base model's vocab_size to avoid shape mismatch during loading,
+            # then resize embeddings afterward to match the fine-tuned vocab_size.
+            target_vocab_size = base_cfg_pretrained.vocab_size
+            base_config = AutoConfig.from_pretrained(model_base)
+            base_cfg_pretrained.vocab_size = base_config.vocab_size
             print('Loading NExT-GPT from base model...')
-            model = NextGPTLlamaForCausalLM.from_pretrained(model_base, low_cpu_mem_usage=True, config=base_cfg_pretrained, ignore_mismatched_sizes=True, **kwargs)
+            model = NextGPTLlamaForCausalLM.from_pretrained(model_base, low_cpu_mem_usage=True, config=base_cfg_pretrained, **kwargs)
+            if target_vocab_size != base_config.vocab_size:
+                print(f'Resizing token embeddings from {base_config.vocab_size} to {target_vocab_size}...')
+                model.resize_token_embeddings(target_vocab_size)
             
             print('Initialize NExT-GPT...')
             tokenizer = AutoTokenizer.from_pretrained(model_base, use_fast=False)
@@ -87,11 +95,26 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
             print('Loading NExT-GPT from base model...')
             tokenizer = AutoTokenizer.from_pretrained(model_base, use_fast=False)
             from nextgpt.model.language_model.nextgpt_llama import NextGPTConfig
-            cfg_pretrained = NextGPTConfig.from_pretrained(model_base)
+            cfg_pretrained = NextGPTConfig.from_pretrained(model_path)
             print('cfg_pretrained: ', cfg_pretrained)
-            model = NextGPTLlamaForCausalLM.from_pretrained(model_base, config=cfg_pretrained).to(device="cuda", dtype=torch.float16) 
+            # Use base model's vocab_size to avoid shape mismatch during loading,
+            # then resize embeddings afterward to match the fine-tuned vocab_size.
+            target_vocab_size = cfg_pretrained.vocab_size
+            base_config = AutoConfig.from_pretrained(model_base)
+            cfg_pretrained.vocab_size = base_config.vocab_size
+            model = NextGPTLlamaForCausalLM.from_pretrained(model_base, config=cfg_pretrained).to(device="cuda", dtype=torch.float16)
+            if target_vocab_size != base_config.vocab_size:
+                print(f'Resizing token embeddings from {base_config.vocab_size} to {target_vocab_size}...')
+                model.resize_token_embeddings(target_vocab_size)
             print("kwargs: ", kwargs)
-            
+
+            print('Loading additional NExT-GPT weights...')
+            if os.path.exists(os.path.join(model_path, 'non_lora_trainables.bin')):
+                non_lora_trainables = torch.load(os.path.join(model_path, 'non_lora_trainables.bin'), map_location='cpu')
+                non_lora_trainables = {(k[11:] if k.startswith('base_model.') else k): v for k, v in non_lora_trainables.items()}
+                if any(k.startswith('model.model.') for k in non_lora_trainables):
+                    non_lora_trainables = {(k[6:] if k.startswith('model.') else k): v for k, v in non_lora_trainables.items()}
+                model.load_state_dict(non_lora_trainables, strict=False)
 
             print('mm_input_projector device', model.get_model().mm_input_projector.device)
             print('mm_input_projector dtype', model.get_model().mm_input_projector.dtype)
@@ -138,7 +161,18 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
         if mm_use_im_start_end:
             tokenizer.add_tokens([DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN], special_tokens=True)
 
-        # num_new_tokens = tokenizer.add_tokens(signal_token_list, special_tokens=True)
+        # Add signal tokens to the tokenizer (matching initialize_vision_tokenizer in training)
+        n_img_tokens = getattr(model.config, "n_img_tokens", 4)
+        n_vid_tokens = getattr(model.config, "n_vid_tokens", 24)
+        n_aud_tokens = getattr(model.config, "n_aud_tokens", 8)
+        signal_token_list = []
+        signal_token_list.extend([f"<image_{i:02d}>" for i in range(n_img_tokens)])
+        signal_token_list.extend([f"<video_{i:02d}>" for i in range(n_vid_tokens)])
+        signal_token_list.extend([f"<audio_{i:02d}>" for i in range(n_aud_tokens)])
+        num_new_tokens = tokenizer.add_tokens(signal_token_list, special_tokens=True)
+        if num_new_tokens > 0:
+            print(f"Added {num_new_tokens} signal tokens to tokenizer.")
+
         if mm_use_im_patch_token or mm_use_im_start_end:
             model.resize_token_embeddings(len(tokenizer))
 

@@ -108,7 +108,7 @@ class Predictor(BasePredictor):
         disable_torch_init()
 
         # ./pretrain_ckpt/vicuna-7b-v1.5
-        self.tokenizer, self.model, self.image_processor, self.video_processor, self.audio_processor, self.context_len, self.model_config = load_pretrained_model(model_base, model_name, model_path, load_8bit=load_8bit, load_4bit=load_4bit) 
+        self.tokenizer, self.model, self.image_processor, self.video_processor, self.audio_processor, self.context_len, self.model_config = load_pretrained_model(model_path, model_base, model_name, load_8bit=load_8bit, load_4bit=load_4bit) 
                                     
     def predict(
         self,
@@ -213,7 +213,7 @@ def load_image(image_file):
 
 if __name__ == "__main__":
     predictor = Predictor()
-    predictor.setup(model_base=None, model_name="nextgpt-v1.5-7b", model_path="./checkpoints/nextgpt-v1.5-7b", load_8bit=False, load_4bit=False)
+    predictor.setup(model_base="./pretrain_ckpt/vicuna-7b-v1.5", model_name="nextgpt-v1.5-7b", model_path="./checkpoints/nextgpt-v1.5-7b", load_8bit=False, load_4bit=False)
     # show me a beautiful landscape of 
     # descibe the bird in the image
     predictor.predict(image="./assets/bird_image.jpg", prompt="show me an image of a cute dog running on the grass")

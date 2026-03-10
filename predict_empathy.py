@@ -52,7 +52,7 @@ def setup_model(model_path, model_base=None, load_8bit=False, load_4bit=False):
     model_name = os.path.basename(model_path)
     tokenizer, model, image_processor, video_processor, audio_processor, context_len, model_config = (
         load_pretrained_model(
-            model_base, model_name, model_path,
+            model_path, model_base, model_name,
             load_8bit=load_8bit, load_4bit=load_4bit
         )
     )
