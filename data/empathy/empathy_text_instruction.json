@@ -1,0 +1,106 @@
+[
+    {
+        "emotion": "sad",
+        "conversations": [
+            {
+                "from": "human",
+                "value": "I just found out that my best friend is moving to another country. I feel so sad and don't know what to do."
+            },
+            {
+                "from": "gpt",
+                "value": "I'm really sorry to hear that your best friend is moving away. It's completely natural to feel sad about this — losing the closeness of a dear friendship due to distance is one of the hardest things to go through. Remember that true friendships can withstand distance, and with today's technology, you can still stay connected through video calls and messages. Take some time to process your feelings, and maybe plan something special together before they leave."
+            }
+        ]
+    },
+    {
+        "emotion": "anxious",
+        "conversations": [
+            {
+                "from": "human",
+                "value": "I have a big presentation at work tomorrow and I can't stop worrying about it. What if I mess up in front of everyone?"
+            },
+            {
+                "from": "gpt",
+                "value": "It's understandable to feel anxious before a big presentation — it shows you care about doing well. Many people experience this kind of nervousness, and it's actually a sign that you're taking it seriously. Try some deep breathing exercises tonight, and remind yourself that you've prepared for this. Even if things don't go perfectly, your colleagues will appreciate your effort and courage. You've got this!"
+            }
+        ]
+    },
+    {
+        "emotion": "grateful",
+        "conversations": [
+            {
+                "from": "human",
+                "value": "My neighbor surprised me by mowing my lawn while I was recovering from surgery. I was so touched by this gesture."
+            },
+            {
+                "from": "gpt",
+                "value": "What a wonderful and heartwarming gesture from your neighbor! It's moments like these that remind us of the kindness that exists in the world. I can understand how touched you must feel — receiving unexpected help during a vulnerable time is truly meaningful. I hope your recovery is going well, and it sounds like you have a great community around you."
+            }
+        ]
+    },
+    {
+        "emotion": "angry",
+        "conversations": [
+            {
+                "from": "human",
+                "value": "Someone at work took credit for a project I spent weeks working on. I'm absolutely furious."
+            },
+            {
+                "from": "gpt",
+                "value": "I completely understand your frustration — having your hard work and dedication go unrecognized, especially when someone else claims credit for it, is deeply upsetting. Your anger is valid. It might help to document your contributions and have a private conversation with your manager about your role in the project. Standing up for yourself in a calm but firm way can help ensure your efforts are properly acknowledged."
+            }
+        ]
+    },
+    {
+        "emotion": "joyful",
+        "conversations": [
+            {
+                "from": "human",
+                "value": "I just got accepted into my dream university! I've been working so hard for this and I can't believe it finally happened!"
+            },
+            {
+                "from": "gpt",
+                "value": "Congratulations! That's absolutely amazing news! All your hard work and dedication have paid off, and you should be incredibly proud of yourself. Getting into your dream university is a huge achievement, and it's a testament to your perseverance and talent. Take a moment to celebrate this milestone — you truly deserve it! What are you most excited about?"
+            }
+        ]
+    },
+    {
+        "emotion": "lonely",
+        "conversations": [
+            {
+                "from": "human",
+                "value": "I moved to a new city three months ago and still haven't made any friends. I feel so isolated."
+            },
+            {
+                "from": "gpt",
+                "value": "Moving to a new city can be really challenging, and feeling lonely after such a big change is completely normal. Three months might feel like a long time, but building meaningful connections takes patience. Consider joining local clubs, classes, or community events that align with your interests — it's a great way to meet people who share your passions. And please be kind to yourself during this transition. The right connections will come."
+            }
+        ]
+    },
+    {
+        "emotion": "afraid",
+        "conversations": [
+            {
+                "from": "human",
+                "value": "My doctor told me I need to have surgery next month. I've never had surgery before and I'm terrified."
+            },
+            {
+                "from": "gpt",
+                "value": "It's completely understandable to feel scared about surgery, especially when it's your first time. Fear of the unknown is one of the most natural human responses. It might help to write down all your questions and concerns to discuss with your doctor — understanding the procedure, recovery process, and what to expect can help ease some of that fear. You don't have to face this alone; lean on your loved ones for support."
+            }
+        ]
+    },
+    {
+        "emotion": "disappointed",
+        "conversations": [
+            {
+                "from": "human",
+                "value": "I didn't get the promotion I was hoping for. I've been working so hard and I thought I deserved it."
+            },
+            {
+                "from": "gpt",
+                "value": "I'm sorry to hear that. Not getting a promotion you worked hard for is genuinely disappointing, and your feelings are completely valid. It doesn't diminish the value of all the effort and dedication you've put in. When you're ready, it might be helpful to ask for feedback from your manager about what you can do to grow further. This setback doesn't define your worth or potential. Keep going — your time will come."
+            }
+        ]
+    }
+]

@@ -101,6 +101,11 @@ For more technical details, kindly refer to the [paper](https://arxiv.org/pdf/23
   * <a href='#Tuning your own dataset'>5.1. Dataset</a>
   * <a href='#Tuning your own framework'>5.2. Model Framework</a>
   * <a href='#Tuning script'>5.3. Fine-tuning</a>
+* <a href='#Empathy Model'>6. Multimodal Empathy Model (NExT-empthy)</a>
+  * <a href='#Empathy Overview'>6.1. Overview</a>
+  * <a href='#Empathy Data'>6.2. Preparing Empathy Data</a>
+  * <a href='#Empathy Training'>6.3. Training the Empathy Model</a>
+  * <a href='#Empathy Inference'>6.4. Inference</a>
  
 ****
 
@@ -353,6 +358,101 @@ Please refer the [finetune.sh](scripts/finetune.sh) for fine-tuning your own mod
 
 ---------
 
+<span id='Empathy Model'/>
+
+## 6. Multimodal Empathy Model (NExT-empthy) <a href='#all_catelogue'>[Back to Top]</a>
+
+NExT-empthy extends the NExT-GPT framework to build a **multimodal empathetic response generation model**. The model perceives user emotions from text, image, video, and audio inputs, and generates empathetic text responses.
+
+
+<span id='Empathy Overview'/>
+
+#### 6.1. Overview
+
+The empathy model architecture uses the same multimodal encoder (ImageBind) and LLM (Vicuna) as NExT-GPT, but with:
+- **Empathy-focused conversation templates** for emotionally appropriate prompting
+- **32 emotion labels** for fine-grained emotion classification
+- **Empathy datasets** for instruction tuning on empathetic dialogues
+- **Dedicated fine-tuning** with LoRA focused on empathetic response generation
+
+**Supported Emotion Labels (32 categories):**
+`surprised`, `excited`, `angry`, `proud`, `sad`, `annoyed`, `grateful`, `lonely`, `afraid`, `terrified`, `guilty`, `impressed`, `disgusted`, `hopeful`, `confident`, `furious`, `anxious`, `anticipating`, `joyful`, `nostalgic`, `disappointed`, `prepared`, `jealous`, `content`, `devastated`, `sentimental`, `embarrassed`, `caring`, `trusting`, `ashamed`, `apprehensive`, `faithful`
+
+
+<span id='Empathy Data'/>
+
+#### 6.2. Preparing Empathy Data <a href='#all_catelogue'>[Back to Top]</a>
+
+Empathy training data should be placed in `./data/empathy/`. See [data/empathy/README.md](data/empathy/README.md) for detailed data format specifications.
+
+**Quick start with EmpatheticDialogues dataset:**
+```bash
+# Download EmpatheticDialogues from https://github.com/facebookresearch/EmpatheticDialogues
+# Then convert to NExT-empthy format:
+python data/empathy/prepare_empathy_data.py \
+    --source_format empatheticdialogues \
+    --input_path /path/to/empatheticdialogues/train.csv \
+    --output_path ./data/empathy/empathy_text_instruction.json
+```
+
+**Data format example:**
+```json
+{
+    "emotion": "sad",
+    "conversations": [
+        {"from": "human", "value": "I just lost my pet..."},
+        {"from": "gpt", "value": "I'm so sorry to hear that..."}
+    ],
+    "input_image": "sad_face.jpg"
+}
+```
+
+
+<span id='Empathy Training'/>
+
+#### 6.3. Training the Empathy Model <a href='#all_catelogue'>[Back to Top]</a>
+
+After preparing the data and pre-trained checkpoints (see Section 3.1), fine-tune the empathy model:
+
+```bash
+# Fine-tune the empathy model
+bash scripts/finetune_empathy.sh
+```
+
+Key training configuration differences from base NExT-GPT fine-tuning:
+- Uses `empathy_v1` conversation template with empathy-focused system prompt
+- Trains for 3 epochs (vs 1 for base) for better emotion understanding
+- Uses lower learning rate (2e-5) for stable fine-tuning
+- Freezes output decoders (image/video/audio generation) to focus on text response quality
+
+
+<span id='Empathy Inference'/>
+
+#### 6.4. Inference <a href='#all_catelogue'>[Back to Top]</a>
+
+Generate empathetic responses using the fine-tuned model:
+
+```bash
+# Text-only empathetic response
+python predict_empathy.py \
+    --model_path ./checkpoints/empathy_finetune_1 \
+    --prompt "I just lost my job and I feel terrible about it."
+
+# With image input
+python predict_empathy.py \
+    --model_path ./checkpoints/empathy_finetune_1 \
+    --prompt "This is how I feel today." \
+    --image ./path/to/emotional_image.jpg
+
+# With audio input
+python predict_empathy.py \
+    --model_path ./checkpoints/empathy_finetune_1 \
+    --prompt "Listen to my voice, I'm not doing well." \
+    --audio ./path/to/voice_recording.wav
+```
+
+
+---------
 
 
 ## Contact
