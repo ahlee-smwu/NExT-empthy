@@ -29,8 +29,8 @@ class ImageBindTower(nn.Module):
 
         self.is_loaded = False
         self.multimodal_tower_name = multimodal_tower
-        # if not delay_load:
-        self.load_model()
+        if not delay_load:
+            self.load_model()
         # elif getattr(args, "unfreeze_mm_vision_tower", False):
         #     self.load_model()
         # else:
@@ -47,6 +47,7 @@ class ImageBindTower(nn.Module):
         self.multimodal_tower, self.visual_hidden_size = imagebind_model.imagebind_huge(pretrained=True, store_path=self.multimodal_tower_name)
         # self.multimodal_tower.to('cuda')
         # TODO: check if this is necessary
+        self.multimodal_tower = self.multimodal_tower.float()  # ✅ conv3d Half 미지원 해결
         if device is not None:
             self.multimodal_tower.to(device)  
 

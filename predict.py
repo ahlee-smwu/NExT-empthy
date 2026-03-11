@@ -21,6 +21,7 @@ import subprocess
 from threading import Thread
 from diffusers.utils import export_to_video
 import os
+
 os.environ["HUGGINGFACE_HUB_CACHE"] = os.getcwd() + "/weights"
 
 # url for the weights mirror
@@ -30,30 +31,42 @@ REPLICATE_WEIGHTS_URL = None
 @dataclass
 class GenerateArguments:
     # Basic generation arguments
-    top_k: int = field(default=1, metadata={"help": "The number of highest probability tokens to keep for top-k-filtering in the sampling strategy"})
-    top_p: float = field(default=1.0, metadata={"help": "The cumulative probability for top-p-filtering in the sampling strategy."})
-    temperature: float = field(default=1.0, metadata={"help": "The value used to module the next token probabilities. Must be strictly positive."},)
-    max_new_tokens: int = field(default=100, metadata={"help": "The maximum number of new tokens to generate. The generation process will stop when reaching this threshold."})
-    do_sample: bool = field(default=True, metadata={"help": "Whether to sample from the output distribution to generate new tokens. If False, use argmax."})
-    use_cache: bool = field(default=False, metadata={"help": "Whether to cache the hidden states of the model to speed up generation."})
-    output_hidden_states: bool = field(default=True,metadata={"help": "Whether to return the hidden states of all intermediate layers."})
-    
+    top_k: int = field(default=1, metadata={
+        "help": "The number of highest probability tokens to keep for top-k-filtering in the sampling strategy"})
+    top_p: float = field(default=1.0,
+                         metadata={"help": "The cumulative probability for top-p-filtering in the sampling strategy."})
+    temperature: float = field(default=1.0, metadata={
+        "help": "The value used to module the next token probabilities. Must be strictly positive."}, )
+    max_new_tokens: int = field(default=100, metadata={
+        "help": "The maximum number of new tokens to generate. The generation process will stop when reaching this threshold."})
+    do_sample: bool = field(default=True, metadata={
+        "help": "Whether to sample from the output distribution to generate new tokens. If False, use argmax."})
+    use_cache: bool = field(default=False, metadata={
+        "help": "Whether to cache the hidden states of the model to speed up generation."})
+    output_hidden_states: bool = field(default=True, metadata={
+        "help": "Whether to return the hidden states of all intermediate layers."})
+
     # Image inference arguments
-    guidance_scale_for_img: float = field(default=7.5, metadata={"help": "The scale for the guidance loss of image signal."})
-    num_inference_steps_for_img: int = field(default=50, metadata={"help": "The number of inference steps for image signal."})
+    guidance_scale_for_img: float = field(default=7.5,
+                                          metadata={"help": "The scale for the guidance loss of image signal."})
+    num_inference_steps_for_img: int = field(default=50,
+                                             metadata={"help": "The number of inference steps for image signal."})
 
     # Video inference arguments
-    guidance_scale_for_vid: float = field(default=7.5, metadata={"help": "The scale for the guidance loss of video signal."})
-    num_inference_steps_for_vid: int = field(default=50, metadata={"help": "The number of inference steps for video signal."})
+    guidance_scale_for_vid: float = field(default=7.5,
+                                          metadata={"help": "The scale for the guidance loss of video signal."})
+    num_inference_steps_for_vid: int = field(default=50,
+                                             metadata={"help": "The number of inference steps for video signal."})
     height: int = field(default=320, metadata={"help": "The height of the video frame."})
     width: int = field(default=576, metadata={"help": "The width of the video frame."})
     num_frames: int = field(default=16, metadata={"help": "The number of frames in the video."})
 
     # Audio inference arguments
-    guidance_scale_for_aud: float = field(default=7.5, metadata={"help": "The scale for the guidance loss of audio signal."})
-    num_inference_steps_for_aud: int = field(default=50, metadata={"help": "The number of inference steps for audio signal."})
+    guidance_scale_for_aud: float = field(default=7.5,
+                                          metadata={"help": "The scale for the guidance loss of audio signal."})
+    num_inference_steps_for_aud: int = field(default=50,
+                                             metadata={"help": "The number of inference steps for audio signal."})
     audio_length_in_s: float = field(default=5.0, metadata={"help": "The length of the audio signal in seconds."})
-
 
 
 class StoppingCriteriaSub(StoppingCriteria):
@@ -85,7 +98,8 @@ def download_json(url: str, dest: Path):
     else:
         print(f"Failed to download {url}. Status code: {res.status_code}")
 
-def download_weights(baseurl: str, basedest: str, files: list[str]):
+
+def download_weights(baseurl: str, basedest: str, files: List[str]):
     basedest = Path(basedest)
     start = time.time()
     print("downloading to: ", basedest)
@@ -98,7 +112,7 @@ def download_weights(baseurl: str, basedest: str, files: list[str]):
             if dest.suffix == ".json":
                 download_json(url, dest)
             else:
-                 subprocess.check_call(["pget", url, str(dest)], close_fds=False)
+                subprocess.check_call(["pget", url, str(dest)], close_fds=False)
     print("downloading took: ", time.time() - start)
 
 
@@ -108,15 +122,16 @@ class Predictor(BasePredictor):
         disable_torch_init()
 
         # ./pretrain_ckpt/vicuna-7b-v1.5
-        self.tokenizer, self.model, self.image_processor, self.video_processor, self.audio_processor, self.context_len, self.model_config = load_pretrained_model(model_base, model_name, model_path, load_8bit=load_8bit, load_4bit=load_4bit) 
-                                    
+        self.tokenizer, self.model, self.image_processor, self.video_processor, self.audio_processor, self.context_len, self.model_config = load_pretrained_model(
+            model_path, model_base, model_name, load_8bit=load_8bit, load_4bit=load_4bit)
+
     def predict(
-        self,
-        image: str = None,
-        prompt: str = None,
-        top_p: float = 1.0,
-        temperature: float = 0.2,
-        max_new_tokens: int = 512,
+            self,
+            image: str = None,
+            prompt: str = None,
+            top_p: float = 1.0,
+            temperature: float = 0.2,
+            max_new_tokens: int = 512,
     ):
         """Run a single prediction on the model"""
 
@@ -133,12 +148,12 @@ class Predictor(BasePredictor):
 
         conv_mode = "llava_v1"
         conv = conv_templates[conv_mode].copy()
-    
+
         image_data = load_image(str(image))
         image_tensor = self.image_processor.preprocess(image_data, return_tensors='pt')['pixel_values'].half().cuda()
-    
+
         # loop start
-    
+
         # just one turn, always prepend image token
         # inp = DEFAULT_IMAGE_TOKEN + '\n' + prompt  # prepend image token when need to understanding images content
         inp = prompt  # no need to prepend image token when generting images
@@ -147,13 +162,17 @@ class Predictor(BasePredictor):
         conv.append_message(conv.roles[1], None)
         _prompt = conv.get_prompt()
         print("prompt: ", _prompt)
-        input_ids = tokenizer_multiple_token(_prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
+        input_ids = tokenizer_multiple_token(_prompt, self.tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(
+            0).cuda()
         print("input_ids: ", input_ids)
         stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
         keywords = [stop_str]
-        image_signal_token_indices = [self.tokenizer(f"<image_{i:02d}>").input_ids for i in range(self.model_config.n_img_tokens)]
-        video_signal_token_indices = [self.tokenizer(f"<video_{i:02d}>").input_ids for i in range(self.model_config.n_vid_tokens)]
-        audio_signal_token_indices = [self.tokenizer(f"<audio_{i:02d}>").input_ids for i in range(self.model_config.n_aud_tokens)]
+        image_signal_token_indices = [self.tokenizer(f"<image_{i:02d}>").input_ids for i in
+                                      range(self.model_config.n_img_tokens)]
+        video_signal_token_indices = [self.tokenizer(f"<video_{i:02d}>").input_ids for i in
+                                      range(self.model_config.n_vid_tokens)]
+        audio_signal_token_indices = [self.tokenizer(f"<audio_{i:02d}>").input_ids for i in
+                                      range(self.model_config.n_aud_tokens)]
         print("image_signal_token_indices: ", image_signal_token_indices)
         print("video_signal_token_indices: ", video_signal_token_indices)
         print("audio_signal_token_indices: ", audio_signal_token_indices)
@@ -186,7 +205,8 @@ class Predictor(BasePredictor):
                         else:
                             if not os.path.exists('./assets/videos'):
                                 os.mkdir('./assets/videos')
-                            video_path = export_to_video(video_frames=m, output_video_path=f'./assets/videos/{prompt}.mp4')
+                            video_path = export_to_video(video_frames=m,
+                                                         output_video_path=f'./assets/videos/{prompt}.mp4')
                             print("video path: ", video_path)
                 elif 'audios' == k:
                     for idx, m in enumerate(output['audios']):
@@ -200,7 +220,7 @@ class Predictor(BasePredictor):
                             print("audio path: ", audio_path)
                 else:
                     pass
-    
+
 
 def load_image(image_file):
     if image_file.startswith('http') or image_file.startswith('https'):
@@ -213,8 +233,8 @@ def load_image(image_file):
 
 if __name__ == "__main__":
     predictor = Predictor()
-    predictor.setup(model_base=None, model_name="nextgpt-v1.5-7b", model_path="./checkpoints/nextgpt-v1.5-7b", load_8bit=False, load_4bit=False)
-    # show me a beautiful landscape of 
+    predictor.setup(model_base="./pretrain_ckpt/vicuna-7b-v1.5", model_name="nextgpt-v1.5-7b", model_path="./checkpoints/nextgpt-v1.5-7b", load_8bit=False, load_4bit=False)
+    # show me a beautiful landscape of
     # descibe the bird in the image
     predictor.predict(image="./assets/bird_image.jpg", prompt="show me an image of a cute dog running on the grass")
 

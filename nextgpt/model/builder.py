@@ -87,17 +87,39 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
             print('Loading NExT-GPT from base model...')
             tokenizer = AutoTokenizer.from_pretrained(model_base, use_fast=False)
             from nextgpt.model.language_model.nextgpt_llama import NextGPTConfig
-            cfg_pretrained = NextGPTConfig.from_pretrained(model_base)
+            cfg_pretrained = NextGPTConfig.from_pretrained(model_path)
+            cfg_pretrained.multimodal_input_tower = "imagebind"
+            cfg_pretrained.mm_hidden_size = 1024
+            cfg_pretrained.image_decoder = "runwayml/stable-diffusion-v1-5"
+            cfg_pretrained.video_decoder = "cerspense/zeroscope_v2_576w"
+            cfg_pretrained.audio_decoder = "cvssp/audioldm-l-full"
             print('cfg_pretrained: ', cfg_pretrained)
-            model = NextGPTLlamaForCausalLM.from_pretrained(model_base, config=cfg_pretrained).to(device="cuda", dtype=torch.float16) 
-            print("kwargs: ", kwargs)
-            
 
-            print('mm_input_projector device', model.get_model().mm_input_projector.device)
-            print('mm_input_projector dtype', model.get_model().mm_input_projector.dtype)
-            print('mm_output_img_projector device', model.get_model().mm_output_img_projector.device)
-            print('mm_output_img_projector dtype', model.get_model().mm_output_img_projector.dtype)
-            print('Model device...', model.get_model().device)
+            # ✅ device_map 제거한 kwargs 사용
+            kwargs_no_device_map = {k: v for k, v in kwargs.items() if k != 'device_map'}
+
+            model = NextGPTLlamaForCausalLM.from_pretrained(
+                model_base,
+                low_cpu_mem_usage=False,
+                config=cfg_pretrained,
+                ignore_mismatched_sizes=True,
+                **kwargs_no_device_map  # ← device_map 빠진 버전
+            )
+
+            print('Loading NExT-GPT weights...')
+            ckpt_path = os.path.join(model_path, 'pytorch_model.bin')
+            extra_weights = torch.load(ckpt_path, map_location='cpu')
+            model.load_state_dict(extra_weights, strict=False)
+            print('NExT-GPT weights loaded.')
+            model = model.to(device="cuda", dtype=torch.float16)  # ← 로드 후 직접 이동
+
+            print("kwargs: ", kwargs)
+
+            print('mm_input_projector device', model.get_model().mm_input_projector.weight.device)
+            print('mm_input_projector dtype', model.get_model().mm_input_projector.weight.dtype)
+            print('mm_output_img_projector device', next(model.get_model().mm_output_img_projector.parameters()).device)
+            print('mm_output_img_projector dtype', next(model.get_model().mm_output_img_projector.parameters()).dtype)
+            print('Model device...', next(model.get_model().parameters()).device)
         else:
             tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False)
             model = NextGPTLlamaForCausalLM.from_pretrained(
@@ -143,6 +165,7 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
             model.resize_token_embeddings(len(tokenizer))
 
         multimodal_tower = model.get_multimodal_tower()
+        multimodal_tower.load_model()
         multimodal_tower.to(device=model.device)
         print("multimodal_tower device: ", multimodal_tower.device)
         print("multimodal_tower dtype: ", multimodal_tower.dtype)
